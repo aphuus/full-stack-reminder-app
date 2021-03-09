@@ -12,7 +12,7 @@ app.use(
 
 app.use(express.json());
 app.use(cors());
-app.use(express.static('build'));
+app.use(express.static('./client/build'));
 
 reminders = [
   {
@@ -36,10 +36,6 @@ reminders = [
     id: 4,
   },
 ];
-
-app.get('/', (req, res) => {
-  res.send('<h1>This is the root</h1>');
-});
 
 app.get('/api/reminders', (req, res) => {
   res.json(reminders);
