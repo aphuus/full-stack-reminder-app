@@ -1,5 +1,5 @@
 import axios from 'axios';
-const baseUrl = 'http://localhost:3001/api/reminders';
+const baseUrl = '/api/reminders';
 
 const getAll = () => {
   const request = axios.get(baseUrl);
