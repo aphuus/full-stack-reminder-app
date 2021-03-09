@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosService from './services/reminders';
 import ReminderForm from './components/ReminderForm';
 import RemindersList from './components/RemindersList';
 
@@ -20,9 +20,7 @@ const App = () => {
 
   // fetch intialized data from server -p3001 / reminders
   useEffect(() => {
-    axios.get('http://localhost:3001/api/reminders').then((response) => {
-      setReminders(response.data);
-    });
+    axiosService.getAll().then((response) => setReminders(response));
   }, []);
 
   // handlers for state changing or form submitting
@@ -46,7 +44,7 @@ const App = () => {
         id: reminders.length + 1,
       };
       setReminders(reminders.concat(newReminderObject));
-      axios.post('http://localhost:3001/api/reminders', newReminderObject);
+      axiosService.create(newReminderObject);
       setNewName('');
       setNewTime(new Date());
     }

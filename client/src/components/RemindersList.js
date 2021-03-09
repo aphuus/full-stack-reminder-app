@@ -1,13 +1,13 @@
 import React from 'react';
-import axios from 'axios';
+import axiosService from '../services/reminders';
 
 const RemindersList = (props) => {
   const { reminders, setReminders } = props;
 
   const handleDelete = (name, id) => {
     if (window.confirm(`Do you want to delete (${name})`)) {
-      axios
-        .delete(`http://localhost:3001/api/reminders/${id}`)
+      axiosService
+        .deleteReminder(id)
         .then(setReminders(reminders.filter((reminder) => reminder.id !== id)));
     }
   };
