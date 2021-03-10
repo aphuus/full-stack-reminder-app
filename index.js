@@ -1,11 +1,11 @@
 const path = require('path');
-const { response, request } = require('express');
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const app = express();
+const Reminder = require('./models/reminder');
 
-// morgan logger
 morgan.token('body', (req, res) => JSON.stringify(req.body));
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
@@ -15,55 +15,41 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(express.json());
 app.use(cors());
 
-reminders = [
-  {
-    name: 'Buy some eggs',
-    timestamp: '2021-11-10T13:00:00.141Z',
-    id: 1,
-  },
-  {
-    name: 'Make an omelette',
-    timestamp: '2021-11-11T08:00:00.141Z',
-    id: 2,
-  },
-  {
-    name: 'Wash dishes',
-    timestamp: '2021-11-11T09:00:00.000Z',
-    id: 3,
-  },
-  {
-    name: 'Buy more eggs',
-    timestamp: '2021-11-11T13:00:00.000Z',
-    id: 4,
-  },
-];
-
 app.get('/api/reminders', (req, res) => {
-  res.json(reminders);
+  Reminder.find({}).then((reminders) => {
+    res.json(reminders);
+  });
 });
 
 app.get('/api/reminders/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const reminder = reminders.find((reminder) => reminder.id === id);
-  if (reminder) {
-    res.json(reminder);
-  } else {
-    res.status(404).end();
-  }
+  Reminder.findById(req.params.id)
+    .then((reminder) => {
+      if (reminder) {
+        res.json(reminder);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(400).send({ error: 'malformatted id' });
+    });
 });
 
 app.delete('/api/reminders/:id', (req, res) => {
-  const id = Number(req.params.id);
-  reminders = reminders.filter((reminder) => reminder.id !== id);
-
-  res.status(204).end();
+  Reminder.findByIdAndDelete(req.params.id)
+    .then((reminder) => {
+      if (reminder) {
+        res.json(reminder);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).end();
+    });
 });
-
-const generateId = () => {
-  const maxId =
-    reminders.length > 0 ? Math.max(...reminders.map((x) => x.id)) : 0;
-  return maxId + 1;
-};
 
 app.post('/api/reminders/', (req, res) => {
   const body = req.body;
@@ -83,25 +69,15 @@ app.post('/api/reminders/', (req, res) => {
       error: 'timestamp missing',
     });
   }
-  if (
-    reminders.some(
-      (reminder) => reminder.name.toLowerCase() === body.name.toLowerCase()
-    )
-  ) {
-    return res.status(400).json({
-      error: 'name must be unique',
-    });
-  }
 
-  const reminder = {
+  const reminder = new Reminder({
     name: body.name,
     timestamp: body.timestamp,
-    id: generateId(),
-  };
+  });
 
-  reminders = reminders.concat(reminder);
-
-  res.json(reminder);
+  reminder.save().then((savedReminder) => {
+    res.json(savedReminder);
+  });
 });
 
 const PORT = process.env.PORT || 3001;

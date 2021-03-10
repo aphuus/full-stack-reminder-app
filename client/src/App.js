@@ -41,7 +41,6 @@ const App = () => {
       const newReminderObject = {
         name: newName,
         timestamp: newTime.toLocaleString('fi-FI', dateOptions),
-        id: reminders.length + 1,
       };
       setReminders(reminders.concat(newReminderObject));
       axiosService.create(newReminderObject);
