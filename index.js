@@ -1,5 +1,8 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const path = require('path');
-require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -42,7 +45,7 @@ app.delete('/api/reminders/:id', (req, res) => {
       if (reminder) {
         res.json(reminder);
       } else {
-        res.status(404).end();
+        res.status(204).end();
       }
     })
     .catch((error) => {
